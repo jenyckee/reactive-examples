@@ -1,0 +1,68 @@
+<html>
+    <head>
+    <meta http-equiv="Content-Type" content="text/html;
+    charset=UTF-8" />
+    </head>
+	<body>
+		<form name ="chat">
+			<textarea name="chatArea" rows="20" cols="80"></textarea>
+			<br></br>
+			<textarea name="inputMessageArea" rows="3" cols="80"></textarea>
+			<br></br>
+			<input type=button OnClick = "sendMessage()" Value = "Submit">
+		</form>
+	</body>
+
+	<script type = "text/javascript">
+	
+	function remoteCall(url, args, responseCallback) {
+		var http = new XMLHttpRequest();
+	  	http.open("POST", url, true);
+	  	http.onreadystatechange = function() {
+			if (http.readyState == 4) {
+				if (http.responseText != "") {
+			    	var response = JSON.parse(http.responseText);
+			    	responseCallback(response);
+				};
+			};
+		};
+	  	http.send(JSON.stringify(args));
+	};
+	
+	function messagesAsString(messages) {
+		var result = "";
+		for (i = 0; i < messages.length; i++) {
+			result += messages[i] + "\n";
+		};
+		return result;
+	}
+	
+	function updateChatArea(messages) {
+		document.chat.chatArea.value = messagesAsString(messages);
+	};
+	
+	var server = "http://localhost:8888/";
+
+	function sendMessage() {
+		remoteCall(
+			server + "receiveMessage", 
+			document.chat.inputMessageArea.value,
+			function (messages) {
+				updateChatArea(messages);
+			});
+	};
+	
+	// Let's poll the server with an AJAX call for new messages
+	setInterval(
+		function () { 
+			remoteCall(
+				server + "messages", 
+				null,
+				function (messages) {
+					updateChatArea(messages);
+				});
+		}, 
+		1000);
+	
+	</script>
+</html>

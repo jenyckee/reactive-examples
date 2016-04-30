@@ -1,0 +1,30 @@
+<html>
+<head>
+<script type="text/javascript" src="jquery-1.3.2.min.js"></script>
+<script type="text/javascript">
+function updateNavigation(title) {
+    alert(title);
+}
+
+$("#Navigation li").live('click', function(e) { 
+    e.preventDefault; 
+    this.blur(); 
+    return updateNavigation($(this).attr('title')); 
+});
+
+</script>
+</head>
+<body>
+<div id="Navigation">
+<ul>
+    <li class="navPrevNext inactive">|&lt; First Page</li>
+    <li class="navPrevNext inactive">&lt; Prev Page</li>
+    <li class="navIndex selected" title="0 ">1</li>
+    <li class="navIndex notselected" title="1 ">2</li>
+    <li class="navIndex notselected" title="2 ">3</li>
+    <li class="navPrevNext active" title="1">Next Page &gt;</li>
+    <li class="navPrevNext active" title="2">Last Page &gt;|</li>
+</ul>
+</div>
+</body>
+</html>

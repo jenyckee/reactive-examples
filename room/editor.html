@@ -1,0 +1,109 @@
+<html>
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Collaborative Text Edit</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript" src="flapjax.js"></script>
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
+  <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+  <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+</head>
+<body>
+	<div id="content" style="float:left">
+		<div id="rooms" style="float:left">
+			<form name="newRoom">
+		 		Room name: <input type="text" name="roomName">
+		 		<ul id="roomList">
+				</ul>
+			</form>
+			<button id="createRoom">Create room</button>
+	 	</div>
+	</div>
+	<div id="userPanel" style="float:right">
+	 	<div id="chatting" style="float:up">
+	 		<form name ="chat">
+				<textarea name="chatArea" rows="10" cols="20"></textarea>
+				<br></br>
+				<textarea name="inputMessageArea" rows="1" cols="20"></textarea>
+				<br></br>
+				<input type=button OnClick = "sendMessage()" Value = "Submit">
+			</form>
+	 	</div>
+	 	<div id="activeUsers" style="float:down">
+	 		<select name="userListBox" size="8">
+			</select>
+	 	</div>
+	 </div>
+<script>
+	
+	var socket = io.connect('http://localhost');
+	var clientName =prompt("Please enter your name","");
+
+
+	$("#createRoom").click(function() {
+		createRoom();
+	});
+
+	function createRoom() {
+		if (document.newRoom.roomName.value != "")
+			socket.emit('room', document.newRoom.roomName.value);
+		else 
+			window.alert("Please specify a name.");
+	}
+
+	function sendMessage() {
+		socket.emit('message', document.chat.inputMessageArea.value);
+	}
+	
+	// Event stream yielding received chat messages
+	var messagesE = receiverE();
+	socket.on('message', function(message) {
+	    messagesE.sendEvent(message);
+	});
+	
+	// Event stream yielding the entire chat text over time
+	var chatTextE = messagesE.collectE("", function (message, chatText) {
+		chatText += message;
+		chatText += '\n';
+		return chatText;
+	});
+
+	insertValueE(chatTextE, document.chat.chatArea, 'value');
+
+	var roomsE = receiverE();
+
+	socket.on('room', function(room) {
+	    roomsE.sendEvent(room);
+	});
+
+	var roomListE = roomsE.collectE(document.getElementById("roomList"), function (room, rooms) {
+		var roomDiv = document.createElement("div");
+		var roomNameLi = document.createElement("li");
+		roomNameLi.innerHTML = room.name + " (" + room.id + ")";
+		roomNameLi.setAttribute('id', 'room' + room.id);
+		var a = document.createElement('a');
+        a.setAttribute('href', '#');
+        a.innerHTML = "Enter";
+        // a.onclick = enterRoom(room.id);
+        roomDiv.appendChild(roomNameLi);
+        roomDiv.appendChild(a);
+		rooms.appendChild(roomDiv);
+		return rooms;
+	});
+
+	insertDomE(roomListE, "roomList");
+
+	var usersE = receiverE();
+
+	socket.on('users', function(users) {
+		usersE.sendEvent(users);
+	});
+
+	var userListE = usersE.collectE(document.getElementById)
+
+</script>
+</body>
+</html>

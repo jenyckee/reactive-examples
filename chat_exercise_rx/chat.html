@@ -1,0 +1,53 @@
+<html>
+    <head>
+    <meta http-equiv="Content-Type" content="text/html;
+    charset=UTF-8" />
+	<meta http-equiv="content-script-type" content="text/javascript">
+    </head>
+	<body>
+		<form name ="chat">
+			<textarea name="chatArea" rows="20" cols="80"></textarea>
+			<br></br>
+			<textarea name="inputMessageArea" rows="3" cols="80"></textarea>
+			<br></br>
+			<input type=button OnClick = "sendMessage()" Value = "Submit">
+		</form>
+	</body>
+	
+	<script type="text/javascript" src="RxJs/rx.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	
+	<script type = "text/javascript">
+	
+	var socket = io.connect('http://localhost');
+	
+	// Observable yielding received chat messages
+	var messagesObservable = Rx.Observable.create(function(observer) {
+		socket.on('message', function(message) { 
+			observer.onNext(message);
+		});
+		// Dispose function has no cleaning up to do.
+	    return function() { };
+	});
+	
+	// Observer updating the chat screen with new messages
+	var messagesObserver = Rx.Observer.create(function (message) {
+	    var chatText = document.chat.chatArea.value;
+		chatText += '\n' 
+		chatText += message;
+        document.chat.chatArea.value = chatText;
+	});
+	
+	var input = $("").toObservable("keyup")
+		.select(function(event)	{ return $(event.target).val(); })
+		.throttle(1000)
+		.distinctUntilChanged();
+	
+    messagesObservable.subscribe(messagesObserver);
+
+	function sendMessage() {
+		socket.emit('message', document.chat.inputMessageArea.value);
+	};
+	
+	</script>
+</html>

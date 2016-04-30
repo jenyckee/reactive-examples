@@ -1,0 +1,31 @@
+<html>
+<head>
+<title>
+Login page
+</title>
+</head>
+<body>
+<h1>
+Collaborative Editor
+</h1>
+<form name="login">
+Username : <input type="text" name="userid"/>
+Password : <input type="password" name="pswrd"/>
+<input type="button" onclick="check(this.form)" value="Login"/>
+<input type="reset" value="Cancel"/>
+</form>
+<script language="javascript">
+function check(form)/*function to check userid & password*/
+{
+ if(form.userid.value == "" && form.pswrd.value == "")
+  {
+    window.open('collabEdit.html')/*opens the target page while Id & password matches*/
+  }
+ else
+ {
+   alert("Error Password or Username")/*displays error message*/
+  }
+}
+</script>
+</body>
+</html>
